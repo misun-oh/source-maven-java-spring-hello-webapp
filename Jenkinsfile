@@ -1,6 +1,6 @@
 pipeline {
   agent {
-    lable "jenkins-node"
+    label "jenkins-node"
   }
 
   triggers {
