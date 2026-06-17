@@ -11,7 +11,7 @@ pipeline {
     stage('Checkout') {
       steps {
         git branch: 'main', 
-        url: '<URL>'
+        url: 'https://github.com/misun-oh/source-maven-java-spring-hello-webapp.git'
       }
     }
     stage('Test Application') {
