@@ -2,7 +2,7 @@
 - hosts : localhost
   connection : local
   tasks :
-    - docker_cotainer :
+    - docker_container :
         name : myhello
         image : momoclass5/myhello:latest
         state: started
