@@ -51,7 +51,7 @@ pipeline {
     stage('Run Container') {
       agent { label 'controller' }
       steps {
-        sh 'docker container run --detach --name myhello -p 80:8080 momoclass5/myhello:latest'
+        ansiblePlaybook(playbook: 'playbook.yml')
       }
     }
   }
