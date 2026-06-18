@@ -1,0 +1,11 @@
+---
+- hosts : localhost
+  connection : local
+  tasks :
+    - docker_cotaier :
+        name : myhello
+        image : momoclass5/myhello:latest
+        state: started
+        ports :
+          - "80:8080"
+...
