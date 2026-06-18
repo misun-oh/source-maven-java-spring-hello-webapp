@@ -1,35 +1,59 @@
 pipeline {
-  agent {
-    label "jenkins-node"
-  }
-
-  triggers {
-    pollSCM('* * * * *')
-  }
-
+  
+  agent none
   stages {
     stage('Checkout') {
+      agent {
+        docker { image 'maven:3-eclipse-temurin-21' }
+      }
       steps {
-        git branch: 'main', 
-        url: 'https://github.com/misun-oh/source-maven-java-spring-hello-webapp.git'
+        git branch: 'main', url: 'https://github.com/misun-oh/source-maven-java-spring-hello-webapp.git'
       }
     }
     stage('Test Application') {
+      agent {
+        docker { image 'maven:3-eclipse-temurin-21' }
+      }
       steps {
         sh 'mvn test'
       }
     }
     stage('Build Application') {
+      agent {
+        docker { image 'maven:3-eclipse-temurin-21' }
+      }
       steps {
-        sh 'mvn package -DskipTests=true'
+        sh 'mvn clean package -DskipTests=true'
       }
     }
-    stage('Application Deploy') {
+    stage('Build Container Image') {
+      agent { label 'controller' }
       steps {
-        deploy adapters: [tomcat9(credentialsId: 'tomcat-user', url: 'http://192.168.56.102:8080')], contextPath: null, war: 'target/hello-world.war'
+        sh 'docker image build -t myhello:v1 .'
+      }
+    }
+    stage('Tag Container Image') {
+      agent { label 'controller' }
+      steps {
+        sh 'docker image tag myhello:v1 momoclass5/myhello:$BUILD_NUMBER' // Tagging with build number
+        sh 'docker image tag myhello:v1 momoclass5/myhello:latest' // Tadocker 
+      }
+    }
+    stage('Push Container Image') {
+      agent { label 'controller' }
+      steps {
+        withDockerRegistry(credentialsId: 'dochub_token', url: 'https://index.docker.io/v1/') {
+          sh 'docker image push momoclass5/myhello:$BUILD_NUMBER' // Tagging with build number
+          sh 'docker image push momoclass5/myhello:latest' // Tagging with latest
+        }
+      }
+    }
+    stage('Run Container') {
+      agent { label 'controller' }
+      steps {
+        sh 'docker container run --detach --name myhello -p 80:8080 momoclass5/myhello:latest'
       }
     }
   }
 }
-
 
